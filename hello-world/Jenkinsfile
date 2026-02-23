@@ -1,0 +1,61 @@
+pipeline {
+    agent any 
+     // Define environment variables for the pipeline
+    environment {
+         IMAGE = "pranitpotsure/hello-java:${BUILD_NUMBER}"
+         TARGET = "ec2-user@3.108.41.40" // Replace with your target server's SSH address
+    } 
+    
+    stages {
+        stage('Checkout') {
+            steps {
+                git 'https://github.com/pranitpotsure/containerized-java-pipeline.git'
+            }
+        }
+     
+        stage('Build WAR') {
+            steps {
+                sh 'cd hello-world && mvn clean package'
+            }
+        }
+
+        stage('Build Docker Image') { 
+            steps { 
+                sh 'cd hello-world && docker build -t $IMAGE .'
+            }
+        }
+        // Push the Docker image to Docker Hub using credentials stored in Jenkins
+        stage('Push Docker') {
+            steps {
+                withCredentials([usernamePassword(
+                    credentialsId: 'dockerhub-pass', // This is the ID of the credentials stored in Jenkins
+                    usernameVariable: 'USER',         // This variable will hold the Docker Hub username
+                    passwordVariable: 'PASS'          // This variable will hold the Docker Hub password
+                )]){
+                    sh '''                                    
+                    echo $PASS | docker login -u $USER --password-stdin   
+                    docker push $IMAGE
+                    '''
+                }  // Log in to Docker Hub using the provided credentials
+            }
+        }
+          //''' is used to allow multi-line shell commands
+        stage('Deploy') {
+            steps {
+                // Connect to the target server via SSH and execute the necessary Docker commands to deploy the application
+                //  docker stop hello-java || true && = Stop the existing container if it is running, "true" is  ignoring errors if it does not exist
+                sshagent(['target-ec2-key']) // sshagent is a Jenkins plugin that allows you to use SSH keys stored in Jenkins credentials for authentication when connecting to remote servers via SSH
+                sh ''' 
+                ssh -o StrictHostKeyChecking=no $TARGET " 
+                docker pull $IMAGE &&
+                docker stop hello-java || true && 
+                docker rm hello-java || true &&  
+                docker run -d -p 8080:8080 --name hello-java $IMAGE 
+                "
+                '''
+                
+            }
+        }
+      
+    }
+}
