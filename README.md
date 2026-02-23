@@ -15,6 +15,46 @@ This project demonstrates an **end-to-end DevOps CI/CD pipeline** that automatic
 ## 📌 Architecture Overview
 
 ```
+
+                👨‍💻 Developer
+                     │
+                     │ git push
+                     ▼
+                 🌐 GitHub Repo
+                     │
+                     │ Webhook trigger
+                     ▼
+            ⚙️ Jenkins Server (AWS EC2)
+            --------------------------------
+            • Checkout source code
+            • Build WAR using Maven
+            • Build Docker image (Tomcat + WAR)
+            • Push image to Docker Hub
+            • SSH into target EC2
+            --------------------------------
+                     │
+                     ▼
+              📦 Docker Hub Registry
+                     │
+                     │ docker pull
+                     ▼
+           🖥 Target EC2 (Docker Host)
+            --------------------------------
+            • Pull latest image
+            • Stop old container
+            • Run new container
+            --------------------------------
+                     │
+                     ▼
+               🌍 User Browser
+                     │
+                     ▼
+        http://TARGET_EC2_IP:8080
+               Java App on Tomcat
+
+```
+
+```
 Developer → GitHub → Webhook → Jenkins (EC2)
 
 Jenkins Pipeline:
