@@ -1,5 +1,9 @@
 # 🚀 Containerized Java CI/CD Pipeline with Jenkins & AWS
 
+<p align="center">
+  <img src="./Images/architecture.png" alt="Architecture Diagram" width="750"/>
+</p>
+
 This project demonstrates an **end-to-end DevOps CI/CD pipeline** that automatically builds, containerizes, and deploys a Java web application using:
 
 * ✅ **GitHub** – Source code management & webhook trigger
