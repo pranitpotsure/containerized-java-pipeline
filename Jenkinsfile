@@ -8,12 +8,11 @@ pipeline {
     
     stages {
 
-        stage('Checkout') {
-            steps {
-                git branch: 'main',
-                git 'https://github.com/pranitpotsure/containerized-java-pipeline.git'
-            }
-        }
+       stage('Checkout') {
+    steps {
+        git url: 'https://github.com/pranitpotsure/containerized-java-pipeline.git', branch: 'main'
+    }
+}
 
         stage('Build WAR') {
             steps {
