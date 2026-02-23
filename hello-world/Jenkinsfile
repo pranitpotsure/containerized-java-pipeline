@@ -44,6 +44,7 @@ pipeline {
             steps {
                 // Connect to the target server via SSH and execute the necessary Docker commands to deploy the application
                 //  docker stop hello-java || true && = Stop the existing container if it is running, "true" is  ignoring errors if it does not exist
+                sshagent(['target-ec2-key']) // sshagent is a Jenkins plugin that allows you to use SSH keys stored in Jenkins credentials for authentication when connecting to remote servers via SSH
                 sh ''' 
                 ssh -o StrictHostKeyChecking=no $TARGET " 
                 docker pull $IMAGE &&
